@@ -14,7 +14,8 @@ public class Main {
     public static void main(String[] args) {
         String[] productos = {
                 "Samsung galaxy s6",
-                "Nokia lumia 1520"
+                "Nokia lumia 1520",
+                "Nexus 6"
         };
 
         WebDriver driver = new ChromeDriver();
@@ -24,22 +25,14 @@ public class Main {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         try{
-            String PRODUCTO = "Samsung galaxy s6";
-            seleccionarElemento(PRODUCTO, wait);
-            wait.until(ExpectedConditions.presenceOfElementLocated( By.className("btn-success") )).click();
-            wait.until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
-            System.out.println(PRODUCTO + " se añadió al carrito exitosamente.");
-            wait.until(ExpectedConditions.presenceOfElementLocated( By.id("cartur") )).click();
-            List<WebElement> elements = wait.until( ExpectedConditions.presenceOfAllElementsLocatedBy( By.className("success") ) );
-            for  (WebElement element : elements) {
-                if ( element.findElement(By.xpath("//td[text()='"+PRODUCTO+"']")) != null ) {
-                    System.out.println(PRODUCTO + " sí existe en el carrito");
-                } else {
-                    System.out.println(PRODUCTO + " no se existe en el carrito");
-                }
+            for (String producto : productos) {
+                seleccionarElemento(producto, wait);
+                irACarrito(wait,driver);
+                System.out.println(producto + " se añadió al carrito exitosamente.");
+                wait.until(ExpectedConditions.presenceOfElementLocated( By.id("cartur") )).click();
+                validarCompra(producto, wait);
+                wait.until( ExpectedConditions.elementToBeClickable( By.xpath("//a[@href='index.html']") ) ).click();
             }
-
         }
         finally{
             driver.quit();
@@ -47,8 +40,22 @@ public class Main {
     }
 
     private static void seleccionarElemento(String producto, WebDriverWait wait) {
-        wait.until(ExpectedConditions.elementToBeClickable( By.linkText("Samsung galaxy s6") )).click();
+        wait.until(ExpectedConditions.elementToBeClickable( By.linkText(producto) )).click();
         System.out.println(producto + " se seleccionó correctamente.");
+    }
+
+    private static void validarCompra(String producto, WebDriverWait wait) {
+        if ( wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//td[text()='"+producto+"']"))) != null ) {
+            System.out.println(producto + " sí existe en el carrito");
+        } else {
+            System.out.println(producto + " no se existe en el carrito");
+        }
+    }
+
+    public static void irACarrito(WebDriverWait wait, WebDriver driver) {
+        wait.until(ExpectedConditions.presenceOfElementLocated( By.className("btn-success") )).click();
+        wait.until(ExpectedConditions.alertIsPresent());
+        driver.switchTo().alert().accept();
     }
 }
 
