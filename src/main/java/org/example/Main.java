@@ -14,9 +14,7 @@ public class Main {
     public static void main(String[] args) {
         String[] productos = {
                 "Samsung galaxy s6",
-                "Nokia lumia 1520",
-                "Nexus 6",
-                "Samsung galaxy s7"
+                "Nokia lumia 1520"
         };
 
         WebDriver driver = new ChromeDriver();
@@ -26,19 +24,19 @@ public class Main {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         try{
-            wait.until(ExpectedConditions.elementToBeClickable( By.linkText("Samsung galaxy s6") )).click();
-            System.out.println("Samsung galaxy s6 se seleccionó correctamente.");
+            String PRODUCTO = "Samsung galaxy s6";
+            seleccionarElemento(PRODUCTO, wait);
             wait.until(ExpectedConditions.presenceOfElementLocated( By.className("btn-success") )).click();
             wait.until(ExpectedConditions.alertIsPresent());
             driver.switchTo().alert().accept();
-            System.out.println("Samsung galaxy se añadió al carrito exitosamente.");
+            System.out.println(PRODUCTO + " se añadió al carrito exitosamente.");
             wait.until(ExpectedConditions.presenceOfElementLocated( By.id("cartur") )).click();
             List<WebElement> elements = wait.until( ExpectedConditions.presenceOfAllElementsLocatedBy( By.className("success") ) );
             for  (WebElement element : elements) {
-                if ( element.findElement(By.xpath("//td[text()='Samsung galaxy s6']")) != null ) {
-                    System.out.println("Samsung galaxy sí sí existe en el carrito");
+                if ( element.findElement(By.xpath("//td[text()='"+PRODUCTO+"']")) != null ) {
+                    System.out.println(PRODUCTO + " sí existe en el carrito");
                 } else {
-                    System.out.println("Samsung galaxy s6 no se existe en el carrito");
+                    System.out.println(PRODUCTO + " no se existe en el carrito");
                 }
             }
 
@@ -46,6 +44,11 @@ public class Main {
         finally{
             driver.quit();
         }
+    }
+
+    private static void seleccionarElemento(String producto, WebDriverWait wait) {
+        wait.until(ExpectedConditions.elementToBeClickable( By.linkText("Samsung galaxy s6") )).click();
+        System.out.println(producto + " se seleccionó correctamente.");
     }
 }
 
