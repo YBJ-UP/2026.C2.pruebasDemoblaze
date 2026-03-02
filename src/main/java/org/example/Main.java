@@ -25,14 +25,19 @@ public class Main {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         try{
+            //TC-CART-01 y 02
             for (String producto : productos) {
                 seleccionarElemento(producto, wait);
                 irACarrito(wait,driver);
                 System.out.println(producto + " se añadió al carrito exitosamente.");
-                wait.until(ExpectedConditions.presenceOfElementLocated( By.id("cartur") )).click();
                 validarCompra(producto, wait);
                 wait.until( ExpectedConditions.elementToBeClickable( By.xpath("//a[@href='index.html']") ) ).click();
             }
+
+            //TC-CART-03
+            String porQuitar = "Samsung galaxy s7";
+            seleccionarElemento(porQuitar, wait);
+            eliminarCompra(porQuitar, wait, driver);
         }
         finally{
             driver.quit();
@@ -40,23 +45,56 @@ public class Main {
     }
 
     private static void seleccionarElemento(String producto, WebDriverWait wait) {
+        System.out.println("\n========== SELECCIONAR " + producto + " ==========");
         wait.until(ExpectedConditions.elementToBeClickable( By.linkText(producto) )).click();
         System.out.println(producto + " se seleccionó correctamente.");
     }
 
-    private static void validarCompra(String producto, WebDriverWait wait) {
-        if ( wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//td[text()='"+producto+"']"))) != null ) {
-            System.out.println(producto + " sí existe en el carrito");
-        } else {
-            System.out.println(producto + " no se existe en el carrito");
-        }
-    }
-
     public static void irACarrito(WebDriverWait wait, WebDriver driver) {
+        System.out.println("========== IR AL CARRITO ==========");
         wait.until(ExpectedConditions.presenceOfElementLocated( By.className("btn-success") )).click();
         wait.until(ExpectedConditions.alertIsPresent());
         driver.switchTo().alert().accept();
+        wait.until(ExpectedConditions.presenceOfElementLocated( By.id("cartur") )).click();
     }
+
+    private static boolean validarCompra(String producto, WebDriverWait wait) {
+        System.out.println("========== VALIDAR " + producto + " ==========");
+        WebElement tabla = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("tbodyid")));
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("td")));
+        List<WebElement> filas = tabla.findElements(By.tagName("tr"));
+        for (WebElement fila : filas) {
+            if (fila.findElements(By.tagName("td")).get(1).getText().equals(producto)) {
+                System.out.println(producto + " sí existe en el carrito.");
+                return true;
+            }
+        }
+        System.out.println(producto + " no existe en el carrito.");
+        return false;
+    }
+
+    private static void eliminarCompra(String producto, WebDriverWait wait, WebDriver driver) {
+        System.out.println("========== ELIMINAR " + producto + " ==========");
+        irACarrito(wait,driver);
+        validarCompra(producto, wait);
+        WebElement tabla = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("tbodyid")));
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("td")));
+        List<WebElement> filas = tabla.findElements(By.tagName("tr"));
+        for (WebElement fila : filas) {
+            if (fila.findElements(By.tagName("td")).get(1).getText().equals(producto)) {
+                fila.findElements(By.tagName("td")).get(3).findElement(By.tagName("a")).click();
+                break;
+            }
+        }
+        driver.navigate().refresh();
+        validarCompra(producto, wait);
+        if (!validarCompra(producto, wait)) {
+            System.out.println(producto + " se eliminó correctamente.");
+        } else {
+            System.out.println(producto + " no se eliminó correctamente.");
+        }
+    }
+
 }
 
 // poner un until para esperar que cargue la página
