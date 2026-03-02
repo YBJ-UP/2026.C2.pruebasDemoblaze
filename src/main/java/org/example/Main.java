@@ -38,6 +38,14 @@ public class Main {
             String porQuitar = "Samsung galaxy s7";
             seleccionarElemento(porQuitar, wait);
             eliminarCompra(porQuitar, wait, driver);
+
+            //TC-CART-04
+            String paraVerificar = "Iphone 6 32gb";
+            seleccionarElemento(paraVerificar, wait);
+            irACarrito(wait,driver);
+            System.out.println("Refrescando carrito...");
+            driver.navigate().refresh();
+            validarCompra(paraVerificar, wait);
         }
         finally{
             driver.quit();
@@ -51,7 +59,7 @@ public class Main {
     }
 
     public static void irACarrito(WebDriverWait wait, WebDriver driver) {
-        System.out.println("========== IR AL CARRITO ==========");
+        System.out.println("\n========== IR AL CARRITO ==========");
         wait.until(ExpectedConditions.presenceOfElementLocated( By.className("btn-success") )).click();
         wait.until(ExpectedConditions.alertIsPresent());
         driver.switchTo().alert().accept();
@@ -59,7 +67,7 @@ public class Main {
     }
 
     private static boolean validarCompra(String producto, WebDriverWait wait) {
-        System.out.println("========== VALIDAR " + producto + " ==========");
+        System.out.println("\n========== VALIDAR " + producto + " ==========");
         WebElement tabla = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("tbodyid")));
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("td")));
         List<WebElement> filas = tabla.findElements(By.tagName("tr"));
@@ -74,7 +82,7 @@ public class Main {
     }
 
     private static void eliminarCompra(String producto, WebDriverWait wait, WebDriver driver) {
-        System.out.println("========== ELIMINAR " + producto + " ==========");
+        System.out.println("\n========== ELIMINAR " + producto + " ==========");
         irACarrito(wait,driver);
         validarCompra(producto, wait);
         WebElement tabla = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("tbodyid")));
@@ -83,16 +91,17 @@ public class Main {
         for (WebElement fila : filas) {
             if (fila.findElements(By.tagName("td")).get(1).getText().equals(producto)) {
                 fila.findElements(By.tagName("td")).get(3).findElement(By.tagName("a")).click();
+                System.out.println(producto + " se eliminó, confirmando...");
                 break;
             }
         }
         driver.navigate().refresh();
-        validarCompra(producto, wait);
         if (!validarCompra(producto, wait)) {
             System.out.println(producto + " se eliminó correctamente.");
         } else {
             System.out.println(producto + " no se eliminó correctamente.");
         }
+        wait.until( ExpectedConditions.elementToBeClickable( By.xpath("//a[@href='index.html']") ) ).click();
     }
 
 }
